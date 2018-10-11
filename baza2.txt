@@ -1,0 +1,115 @@
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS Drzava;
+SET FOREIGN_KEY_CHECKS = 1;
+CREATE TABLE Drzava( 
+id int auto_increment primary key,
+naziv varchar(50)
+);
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS Sastojak;
+SET FOREIGN_KEY_CHECKS = 1;
+CREATE TABLE Sastojak( 
+id int auto_increment primary key,
+naziv varchar(50) not null,
+bkpjm int not null,
+jedinicaMere varchar(20)
+);
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS Recept;
+SET FOREIGN_KEY_CHECKS = 1;
+CREATE TABLE Recept(
+id int auto_increment primary key,
+naziv varchar(50) not null,
+opis varchar (20),
+drzavaPorekla int,
+kuvar int 
+);
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS Kuvar;
+SET FOREIGN_KEY_CHECKS = 1;
+CREATE TABLE Kuvar(
+id int auto_increment primary key,
+naziv varchar(50)not null,
+godinaIzdavanja int not null
+);
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS sastojakRecept;
+SET FOREIGN_KEY_CHECKS = 1;
+CREATE TABLE sastojakRecept(
+id int auto_increment primary key,
+idSastojak int not null,
+idRecept int not null,
+constraint fk_idSastojak foreign key (idSastojak) references Sastojak(id),
+constraint fk_idRecept foreign key (idRecept) references Recept(id)
+);
+alter table Recept
+add constraint fk_kuvar foreign key (kuvar) references Kuvar(id),
+add constraint fk_drzavaPorekla foreign key (drzavaPorekla) references Drzava(id);
+
+insert into Drzava (naziv) values ('Srbija');
+insert into Drzava (naziv) values ('Italija');
+insert into Drzava (naziv) values ('Crna Gora');
+insert into Drzava (naziv) values ('Francuska');
+insert into Drzava (naziv) values ('Bosna');
+insert into Drzava (naziv) values ('Spanija');
+
+insert into Sastojak (naziv, bkpjm) values ('kupus', 450 );
+insert into Sastojak (naziv, bkpjm) values ('kore', 650 );
+insert into Sastojak (naziv, bkpjm) values ('paprika', 200 );
+insert into Sastojak (naziv, bkpjm) values ('pasulj', 700 );
+insert into Sastojak (naziv, bkpjm) values ('grasak', 500);
+insert into Sastojak (naziv, bkpjm) values ('jecam',150 );
+
+insert into Kuvar (naziv, godinaIzdavanja) values ('Srpski kuvar', 1950);
+insert into Kuvar (naziv, godinaIzdavanja) values ('Italijanski kuvar', 2005);
+insert into Kuvar (naziv, godinaIzdavanja) values ('Crnogorski kuvar', 1980);
+insert into Kuvar (naziv, godinaIzdavanja) values ('Francuski kuvar', 2018);
+insert into Kuvar (naziv, godinaIzdavanja) values ('Bosanski kuvar', 2001);
+insert into Kuvar (naziv, godinaIzdavanja) values ('Spanski kuvar', 1998);
+
+insert into Recept (naziv, drzavaPorekla, kuvar) values ('sarma', 1, 2);
+insert into Recept (naziv, drzavaPorekla, kuvar) values ('pita', 3, 4);
+insert into Recept (naziv, drzavaPorekla, kuvar) values ('burek', 5,2);
+insert into Recept (naziv, drzavaPorekla, kuvar) values ('spagete',6, 3);
+insert into Recept (naziv, drzavaPorekla, kuvar) values ('pindjur', 3, 1);
+insert into Recept (naziv, drzavaPorekla, kuvar) values ('zimnica', 4, 6);
+
+insert into sastojakRecept (idSastojak, idRecept) values (1, 2);
+insert into sastojakRecept (idSastojak, idRecept) values (3, 4);
+insert into sastojakRecept (idSastojak, idRecept) values (5, 2);
+insert into sastojakRecept (idSastojak, idRecept) values (6, 3);
+insert into sastojakRecept (idSastojak, idRecept) values (3, 1);
+insert into sastojakRecept (idSastojak, idRecept) values (4, 6);
+
+/*select * from Kuvar
+where godinaIzdavanja < 2000 and godinaIzdavanja > 1900;*/
+
+/*select * from Sastojak
+where bkpjm > 200;*/
+
+/*select * from Recept r
+join Drzava d on r.drzavaPorekla = d.id 
+where d.naziv like 'Srbija';*/
+
+/*select distinct s. * from Sastojak s
+join sastojakRecept sr on sr.idSastojak = s.id
+join Recept r on sr.idRecept = r.id;*/
+
+/*select distinct k. * from Kuvar k
+join Recept r on r.kuvar = k.id
+join Drzava d on d.id = r.drzavaPorekla
+where d.naziv like 'Italija' or d.naziv like 'Francuska';*/
+
+/*select distinct s. * from Sastojak s
+where s.id in (select s.id from Sastojak)
+and s.id not in(select s.id from Sastojak s join sastojakRecept sr on sr.idSastojak = s.id);*/
+
+select r. * from  Recept r 
+join sastojakRecept sr on r.id = sr.idRecept
+join Sastojak s on s.id = sr.idSastojak
+group by r.id 
+having sum(s.bkpjm)>1000;
